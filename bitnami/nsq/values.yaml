@@ -80,3 +80,38 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+nsqadmin:
+  fullname: nsqadmin
+  labels: nsqadmin
+  ## @param master.updateStrategy.type Redis&trade; master statefulset strategy type
+  ## @skip master.updateStrategy.rollingUpdate
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## StrategyType
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  ## Redis&trade; master resource requests and limits
+  ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param master.resources.limits The resources limits for the Redis&trade; master containers
+  ## @param master.resources.requests The requested resources for the Redis&trade; master containers
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## @param master.livenessProbe.enabled Enable livenessProbe on Redis&trade; master nodes
+  ## @param master.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param master.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param master.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param master.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param master.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 5
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5

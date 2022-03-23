@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.nsqadmin.fullname }}
+  labels: {{- .Values.nsqadmin.labels | nindent 4 }}
+    app.kubernetes.io/component: nsqadmin
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy: {{- toYaml .Values.nsqadmin.updateStrategy | nindent 4 }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nsqadmin
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: nsqadmin
+    spec:
+      containers:
+        - name: nsqadmin
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources: {{- toYaml .Values.nsqadmin.resources | nindent 12 }}
+          command:
+          - /bin/nsqadmin
+          ports:
+          - containerPort: 4171
+            name: http
+            protocol: TCP
+          - containerPort: 4170
+            name: transport
+            protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 4171
+            initialDelaySeconds: {{ .Values.nsqadmin.livenessProbe.initialDelaySeconds }}
+            # One second longer than command timeout should prevent generation of zombie processes.
+            timeoutSeconds: {{ add1 .Values.nsqadmin.livenessProbe.timeoutSeconds }}
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 4171
+            initialDelaySeconds: {{ .Values.nsqadmin.livenessProbe.initialDelaySeconds }}
+            # One second longer than command timeout should prevent generation of zombie processes.
+            timeoutSeconds: {{ add1 .Values.nsqadmin.livenessProbe.timeoutSeconds }}
+          args:
+          - --lookupd-http-address
+          - nsqlookupd:4161
